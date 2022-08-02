@@ -14,11 +14,12 @@ resource "aws_codepipeline" "example" {
 }
 
 module "codepipeline_notifications" {
-  source  = "kjagiello/codepipeline-slack-notifications/aws"
-  version = "1.0.0"
+  source  = "pappacena/codepipeline-slack-notifications/aws"
+  version = "0.0.2"
+  notification_rule_name = "notification-rule"
 
   name          = "codepipeline-notifications"
-  namespace     = "kjagiello"
+  namespace     = "pappacena"
   stage         = "sandbox"
   slack_url     = "https://hooks.slack.com/services/(...)"
   slack_channel = "#notifications"

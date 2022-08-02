@@ -1,10 +1,11 @@
 module "default_label" {
   source     = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.22.0"
-  namespace  = var.namespace
-  stage      = var.stage
-  name       = var.name
-  attributes = var.attributes
-  tags       = var.tags
+  notification_rule_name = var.notification_rule_name
+  namespace              = var.namespace
+  stage                  = var.stage
+  name                   = var.name
+  attributes             = var.attributes
+  tags                   = var.tags
 }
 
 locals {
@@ -27,7 +28,7 @@ resource "aws_codestarnotifications_notification_rule" "pipeline_updates" {
   count          = length(var.codepipelines)
   detail_type    = "FULL"
   event_type_ids = var.event_type_ids
-  name           = "slackNotification${var.codepipelines[count.index].name}"
+  name           = var.notification_rule_name
   resource       = var.codepipelines[count.index].arn
 
   target {
