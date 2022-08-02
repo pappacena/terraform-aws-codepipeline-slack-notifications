@@ -3,6 +3,13 @@ variable "name" {
   description = "Name (unique identifier for app or service)"
 }
 
+variable "notification_rule_name" {
+  type        = string
+  description = "Notification rule name, to allow multiple notification triggers per pipeline"
+  default     = "slack-notification"
+}
+
+
 variable "namespace" {
   type        = string
   description = "Namespace (e.g. `skynet`)"
