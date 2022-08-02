@@ -1,8 +1,8 @@
 # terraform-aws-codepipeline-slack-notifications
 
-[![Github Actions](https://github.com/kjagiello/terraform-aws-codepipeline-slack-notifications/workflows/CI/badge.svg)](https://github.com/kjagiello/terraform-aws-codepipeline-slack-notifications/actions?workflow=CI)
+[![Github Actions](https://github.com/pappacena/terraform-aws-codepipeline-slack-notifications/workflows/CI/badge.svg)](https://github.com/pappacena/terraform-aws-codepipeline-slack-notifications/actions?workflow=CI)
 
-A terraform module to set up Slack notifications for your AWS CodePipelines. Available through the [Terraform registry](https://registry.terraform.io/modules/kjagiello/codepipeline-slack-notifications/aws).
+A terraform module to set up Slack notifications for your AWS CodePipelines. Available through the [Terraform registry](https://registry.terraform.io/modules/pappacena/codepipeline-slack-notifications/aws).
 
 ![image](https://user-images.githubusercontent.com/74944/71839994-b660bf00-30bc-11ea-8e5e-4d8850da6900.png)
 
@@ -49,6 +49,62 @@ resource automatically creates the required service-linked role, which
 typically is nearly instantaneous. Just reapply your Terraform plan and you
 should be good to go.
 
+## Multiple notifications
+
+It is possible to notify different channels for different actions. For example,
+to notify failures to #pipeline-errors and everything else to #pipeline-info:
+
+
+```hcl
+resource "aws_codepipeline" "example" {
+  // ...
+}
+
+module "codepipeline_notifications" {
+  source  = "pappacena/codepipeline-slack-notifications/aws"
+  version = "0.0.2"
+  notification_rule_name = "notification-rule-info"
+
+  name          = "codepipeline-notifications"
+  namespace     = "pappacena"
+  stage         = "sandbox"
+  slack_url     = "https://hooks.slack.com/services/(...)"
+  slack_channel = "#notifications"
+  codepipelines = [
+    aws_codepipeline.example,
+  ]
+  event_type_ids = [
+    "codepipeline-pipeline-pipeline-execution-started",
+    "codepipeline-pipeline-pipeline-execution-resumed",
+    "codepipeline-pipeline-pipeline-execution-succeeded",
+    "codepipeline-pipeline-pipeline-execution-superseded"
+  ]
+}
+
+module "codepipeline_notifications" {
+  source  = "pappacena/codepipeline-slack-notifications/aws"
+  version = "0.0.2"
+  notification_rule_name = "notification-rule-error"
+
+  name          = "codepipeline-notifications"
+  namespace     = "pappacena"
+  stage         = "sandbox"
+  slack_url     = "https://hooks.slack.com/services/(...)"
+  slack_channel = "#notifications"
+  codepipelines = [
+    aws_codepipeline.example,
+  ]
+  event_type_ids = [
+    "codepipeline-pipeline-pipeline-execution-canceled",
+    "codepipeline-pipeline-pipeline-execution-failed"
+  ]
+}
+```
+
+Note the different `event_type_ids` configs, and `notification_rule_name`,
+which should be unique.
+
+
 # Module documentation
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
@@ -75,6 +131,8 @@ should be good to go.
 | <a name="input_codepipelines"></a> [codepipelines](#input\_codepipelines) | CodePipeline resources that should trigger Slack notifications | `list(any)` | n/a | yes |
 | <a name="input_event_type_ids"></a> [event\_type\_ids](#input\_event\_type\_ids) | The list of event type to trigger a notification on | `list(any)` | <pre>[<br>  "codepipeline-pipeline-pipeline-execution-failed",<br>  "codepipeline-pipeline-pipeline-execution-canceled",<br>  "codepipeline-pipeline-pipeline-execution-started",<br>  "codepipeline-pipeline-pipeline-execution-resumed",<br>  "codepipeline-pipeline-pipeline-execution-succeeded",<br>  "codepipeline-pipeline-pipeline-execution-superseded"<br>]</pre> | no |
 | <a name="input_name"></a> [name](#input\_name) | Name (unique identifier for app or service) | `string` | n/a | yes |
+| <a name="notification_rule_name"></a> [notification_rule_name](#notification\_rule\_name) | Unique identifier for the notification rule.
+Needed in case you have more than 1 notification for the same pipeline | `string` | n/a | yes |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace (e.g. `skynet`) | `string` | n/a | yes |
 | <a name="input_slack_channel"></a> [slack\_channel](#input\_slack\_channel) | A slack channel to send the deployment notifications to | `string` | n/a | yes |
 | <a name="input_slack_emoji"></a> [slack\_emoji](#input\_slack\_emoji) | The emoji avatar of the user that sends the notifications | `string` | `":rocket:"` | no |
