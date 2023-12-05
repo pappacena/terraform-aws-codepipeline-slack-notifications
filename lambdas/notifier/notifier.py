@@ -87,7 +87,11 @@ def build_slack_message_from_event(event):
     pipeline_execution = codepipeline.get_pipeline_execution(
         pipelineName=pipeline_name, pipelineExecutionId=execution_id
     )["pipelineExecution"]
-    revision = pipeline_execution["artifactRevisions"][0]
+
+    if pipeline_execution.get("artifactRevisions"):
+        revision = pipeline_execution["artifactRevisions"][0]
+    else:
+        revision = {}
     revision_url = revision.get("revisionUrl")
     revision_summary = revision.get("revisionSummary")
 
